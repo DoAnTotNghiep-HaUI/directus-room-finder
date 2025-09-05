@@ -1,5 +1,7 @@
 {
   "endpoints": {
-    "chat-socket": "./chat-socket"
+    "chat-socket": "./chat-socket",
+    "utils": "./utils",
+    "test": "./test"
   }
 }
