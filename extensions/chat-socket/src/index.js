@@ -102,17 +102,6 @@ export default defineEndpoint((router, { services, database, getSchema }) => {
                 unread_count: nextUnread,
               });
 
-              await trx.commit();
-
-              // Payload phát đi kèm client_temp_id (không lưu DB)
-              const payload = { ...newMessageData, client_temp_id };
-
-              // Phát message đầy đủ tới room hội thoại & room người nhận
-              io?.to(`conversation_${conversation}`).emit(
-                "new_message",
-                payload
-              );
-
               // Phát conversation_updated cho cả 2 bên
               const updatedConv = await new ItemsService("conversation", {
                 schema,
@@ -128,6 +117,15 @@ export default defineEndpoint((router, { services, database, getSchema }) => {
               });
 
               await trx.commit();
+
+              // Payload phát đi kèm client_temp_id (không lưu DB)
+              const payload = { ...newMessageData, client_temp_id };
+
+              // Phát message đầy đủ tới room hội thoại & room người nhận
+              io?.to(`conversation_${conversation}`).emit(
+                "new_message",
+                payload
+              );
               io?.to(`user_${receiver}`).emit(
                 "conversation_updated",
                 updatedConv
@@ -223,8 +221,6 @@ export default defineEndpoint((router, { services, database, getSchema }) => {
       await conversationService.updateOne(conversationId, {
         unread_count: 0,
       });
-
-      await trx.commit();
 
       // Lấy conversation đã cập nhật và gửi thông báo
       const freshConversationService = new ItemsService("conversation", {
